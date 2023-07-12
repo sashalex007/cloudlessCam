@@ -161,6 +161,10 @@ void init(ArduCAM& cam, int camera_signal, int camera_power) {
     Serial.println("Camera init complete.");
 }
 
+void Camera::power_down(int camera_power) {
+    digitalWrite(camera_power, LOW);
+}
+
 Camera::Camera(int camera_signal, int camera_power) {
     cam = {OV2640, camera_signal};
     init(cam, camera_signal, camera_power);

@@ -9,6 +9,7 @@ class Camera {
     public:
         explicit Camera(int camera_signal, int camera_power);
         void capture(String& base64_string);
+        void power_down(int camera_power);
 };
 
 #endif

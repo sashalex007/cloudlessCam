@@ -46,6 +46,7 @@ void start() {
             img_count++;
         }
     }
+    cam.power_down(camera_power);
 }
 
 void check_reset() {
@@ -91,10 +92,6 @@ void check_wifi() {
     Serial.println(WiFi.localIP());
 }
 
-void power_down_cam() {
-    digitalWrite(camera_power, LOW);
-}
-
 void set_new_time() {
     gettimeofday(&sleep_time, NULL);
 }
@@ -118,7 +115,6 @@ void setup() {
         start();
         check_wifi();
         email.send(is_reset, boot_count, 0);
-        power_down_cam();
         set_new_time();
     } else {
         Serial.println("Duration below threshold");
