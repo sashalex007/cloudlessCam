@@ -6,6 +6,7 @@
 
 #include "email/email.h"
 #include "camera/camera.h"
+
 #include "gpio/gpio.h"
 #include "read_battery/read_battery.h"
 #include "reset/reset.h"
@@ -22,19 +23,16 @@ const int camera_signal = 15;
 const int camera_power = 13;
 
 Email email;
-Camera cam(camera_signal, camera_power);
-std::vector<String> base64_vector;
- 
+std::vector<String> base64_vector = {"","","",""};
+
 void start() {
+    Camera cam(camera_signal, camera_power);
     int max_img = 4;
     int img_count = 0;
 
     while (img_count < max_img) {
-        if (!is_reset) {
-            base64_vector.push_back("");
-            if (ESP.getFreeHeap() > 150000) {
-                cam.capture(base64_vector[img_count]);
-            }
+        if (!is_reset && ESP.getFreeHeap() > 150000) {
+            cam.capture(base64_vector[img_count]);
         }
 
         if (base64_vector[img_count] != "") { //skip empty string
@@ -64,6 +62,8 @@ void check_reset() {
 }
 
 bool check_threshold() {
+    int duration_s = 30;
+
     timeval duration;  // compute duration since last boot
     if (esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_EXT0) {
         timeval timeNow;
@@ -71,7 +71,7 @@ bool check_threshold() {
         timersub(&timeNow, &sleep_time, &duration);
         Serial.printf("Duration: %" PRIu64 "s\n", (duration.tv_sec * (uint64_t)1));
     }
-    return (duration.tv_sec * (uint64_t)1) > (time_t)30 || duration.tv_sec * (uint64_t)1 < (time_t)0 || is_reset;
+    return (duration.tv_sec * (uint64_t)1) > (time_t)duration_s || duration.tv_sec * (uint64_t)1 < (time_t)0 || is_reset;
 }
 
 void check_wifi() {
@@ -106,15 +106,15 @@ void sleep() {
 }
 
 void setup() {
+    init_pir();  // init pir sensor power interrupt and wake pin
     Serial.begin(9600);
     check_reset(); // check if is_reset boot
-    init_pir();  // init pir sensor power interrupt and wake pin
 
     if (check_threshold()) { //check if over time threshold
         if (!is_reset) {
             boot_count++;
         }
-        WiFi.begin(ssid, password); 
+        WiFi.begin(ssid, password);
         start();
         check_wifi();
         email.send(is_reset, boot_count, 0);

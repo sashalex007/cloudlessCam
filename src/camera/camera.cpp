@@ -1,9 +1,9 @@
+#include "camera.h"
 #include <ArduCAM.h>
 #include <base64.h>
 #include <SPI.h>
 #include <Wire.h>
 #include <esp32-hal.h>
-#include "camera.h"
 
 void Camera::capture(String& base64_string) {
     byte buff[255];
@@ -126,11 +126,13 @@ void set_exposure(ArduCAM& cam) {
 }
 
 void init(ArduCAM& cam, int camera_signal, int camera_power) {
+    Serial.println("Camera initializing...");
     uint8_t temp;
     // set the CS as an output:
     pinMode(camera_signal, OUTPUT);
     pinMode(camera_power, OUTPUT);
     digitalWrite(camera_power, HIGH);
+
     Wire.begin();
     // initialize SPI:
     SPI.begin();
@@ -156,6 +158,7 @@ void init(ArduCAM& cam, int camera_signal, int camera_power) {
     cam.OV2640_set_JPEG_size(OV2640_800x600);
     cam.clear_fifo_flag();
     delay(500);  // delay for camera sensor initialization
+    Serial.println("Camera init complete.");
 }
 
 Camera::Camera(int camera_signal, int camera_power) {

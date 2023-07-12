@@ -28,7 +28,7 @@ void Email::add_attachment(String& base64_string, int img_count) {
     att.descr.filename = toStringPtr(img_count) + ".jpeg";
     att.descr.mime = "image/jpeg";
     att.blob.size = base64_string.length() + 1000;                         // correct for jpeg corruption
-    att.blob.data = reinterpret_cast<const uint8_t *>(&base64_string);  // convert to uint8 array
+    att.blob.data = reinterpret_cast<const uint8_t *>(&base64_string[0]);  // convert to uint8 array
     att.descr.transfer_encoding = Content_Transfer_Encoding::enc_base64;
     att.descr.content_encoding = Content_Transfer_Encoding::enc_base64;
     att.descr.content_id = "image-" + toStringPtr(img_count);

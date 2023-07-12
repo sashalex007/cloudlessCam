@@ -25,8 +25,7 @@ void open_reset(std::vector<String>& base64_vector, int& reset_count) {
     for (int i = 0; i < 4; i++) {
         file = LittleFS.open(files[i], "r");
         while (file.available()) {
-            base64_vector.push_back(file.readString());
-            //base64_vector[i] = file.readString();
+            base64_vector[i] = file.readString();
         }
         file.close();
         LittleFS.remove(files[i]);
