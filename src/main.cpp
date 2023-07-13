@@ -21,7 +21,7 @@ const int pir_power = 25;
 //cam pins
 const int camera_signal = 15;
 const int camera_power = 13;
-//
+//static values
 const int threshold_duration_s = 30;
 const int max_reset_tries = 3;
 const int wifi_reset_s = 10;
