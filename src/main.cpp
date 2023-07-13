@@ -1,65 +1,53 @@
-#include <WiFi.h>
-#include <sys/time.h>
 #include <LittleFS.h>
+#include <WiFi.h>
 #include <memorysaver.h>
+#include <sys/time.h>
+
 #include <vector>
 
 #include "email/email.h"
 #include "camera/camera.h"
-
 #include "gpio/gpio.h"
+#include "private_variables.h"
 #include "read_battery/read_battery.h"
 #include "reset/reset.h"
-#include "private_variables.h"
+
+using namespace std;
 
 RTC_DATA_ATTR timeval sleep_time;
 RTC_DATA_ATTR int boot_count = 0;
-int reset_count = 0; //prevents reset bootloop. keep global
-bool is_reset = false;
-//pins
+
+// pins
 const int pir_signal = 39;
 const int pir_power = 25;
 const int camera_signal = 15;
 const int camera_power = 13;
 
-Email email;
-std::vector<String> base64_vector = {"","","",""};
-
-void start() {
+void capture_pics(vector<String>& base64_vector) {
     Camera cam(camera_signal, camera_power);
-    int max_img = 4;
     int img_count = 0;
-
-    while (img_count < max_img) {
-        if (!is_reset && ESP.getFreeHeap() > 150000) {
-            cam.capture(base64_vector[img_count]);
+    for (String& base64_string : base64_vector) {
+        if (ESP.getFreeHeap() > 150000) {
+            cam.capture(base64_string);
         }
-
-        if (base64_vector[img_count] != "") { //skip empty string
-            email.add_attachment(base64_vector[img_count], img_count);
-            img_count++;
-            if (img_count < max_img) {
-                delay(100); //delay between captures
-            }
-        } else {
-            Serial.println("Skipped"); 
-            img_count++;
+        ++img_count;
+        if (img_count < base64_vector.size()) {
+            delay(100);
         }
     }
     cam.power_down(camera_power);
 }
 
-void check_reset() {
-    LittleFS.begin();
-    if (LittleFS.exists("/0.txt")) {  // check if boot is for is_reset
-        is_reset = true;
-        open_reset(base64_vector, reset_count);
+void send_email(vector<String>& base64_vector, bool reset) {
+    Email email;
+    int img_count = 0;
+    for (String& base64_string : base64_vector) {
+        if (base64_string != "") {
+            email.add_attachment(base64_string, img_count);
+        }
+        ++img_count;
     }
-    if (reset_count >= 3) {
-        Serial.println("Reset Failed...going to sleep now");
-        delay(100);
-        esp_deep_sleep_start();
-    }
+    email.send(reset, boot_count, 0);
 }
 
 bool check_threshold() {
@@ -72,10 +60,10 @@ bool check_threshold() {
         timersub(&timeNow, &sleep_time, &duration);
         Serial.printf("Duration: %" PRIu64 "s\n", (duration.tv_sec * (uint64_t)1));
     }
-    return (duration.tv_sec * (uint64_t)1) > (time_t)duration_s || duration.tv_sec * (uint64_t)1 < (time_t)0 || is_reset;
+    return (duration.tv_sec * (uint64_t)1) > (time_t)duration_s || duration.tv_sec * (uint64_t)1 < (time_t)0;
 }
 
-void check_wifi() {
+void check_wifi(vector<String>& base64_vector, int reset_count) {
     int connection_timeout = 10;
     int timeout_counter = 0;
     while (WiFi.status() != WL_CONNECTED) {
@@ -104,20 +92,30 @@ void sleep() {
 
 void setup() {
     init_pir();  // init pir sensor power interrupt and wake pin
+    vector<String> img_container = {"", "", "", ""};
     Serial.begin(9600);
-    check_reset(); // check if is_reset boot
 
-    if (check_threshold()) { //check if over time threshold
-        if (!is_reset) {
-            boot_count++;
-        }
+    pair<bool, int> reset_result = is_reset();
+    bool reset = reset_result.first;
+    int reset_count = reset_result.second;
+
+    if ((check_threshold() || reset) && reset_count < 4) {  // check if over time threshold or reset
         WiFi.begin(ssid, password);
-        start();
-        check_wifi();
-        email.send(is_reset, boot_count, 0);
+        if (reset) {
+            open_reset(img_container);
+        } else {
+            ++boot_count;
+            capture_pics(img_container);
+        }
+        check_wifi(img_container, reset_count);
+        send_email(img_container, reset);
         set_new_time();
     } else {
-        Serial.println("Duration below threshold");
+        if (reset_count >= 4) {
+            Serial.println("Reset failed");
+        } else {
+            Serial.println("Duration below threshold");
+        }
         delay(2000);
     }
     sleep();

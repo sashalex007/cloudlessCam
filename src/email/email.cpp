@@ -51,6 +51,8 @@ void Email::send(const int reset, int boot_count, int tries) {
             Serial.println("Error sending Email, trying again" + smtp.errorReason());
             send(reset, boot_count, tries + 1);
         }
+    } else {
+        Serial.println("Sending email failed " + smtp.errorReason());
     }
 }
 
