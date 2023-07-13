@@ -10,8 +10,8 @@ extern const char *sender_name;
 extern const char *sender_email;
 extern const char *recipient_name1;
 extern const char *recipient_email1;
-extern const char *recipient_name2;
-extern const char *recipient_email2;
+extern const char *recipient_name2; //optional
+extern const char *recipient_email2; //optional
 
 //mailgun settings
 extern const int host_port;

@@ -3,13 +3,13 @@
 #include <esp32-hal.h>
 #include "gpio.h"
 
-void init_pir() {
-    rtc_gpio_hold_dis(GPIO_NUM_25); //interrupt pir power
-    rtc_gpio_init(GPIO_NUM_25);
-    rtc_gpio_set_direction(GPIO_NUM_25, RTC_GPIO_MODE_OUTPUT_ONLY);
-    rtc_gpio_set_level(GPIO_NUM_25, 0);
+void init_pir(const int pir_signal, const int pir_power) {
+    rtc_gpio_hold_dis(pir_power); //interrupt pir power
+    rtc_gpio_init(pir_power);
+    rtc_gpio_set_direction(pir_power, RTC_GPIO_MODE_OUTPUT_ONLY);
+    rtc_gpio_set_level(pir_power, 0);
     delay(10);
-    rtc_gpio_set_level(GPIO_NUM_25, 1);
-    rtc_gpio_hold_en(GPIO_NUM_25);
-    esp_sleep_enable_ext0_wakeup(GPIO_NUM_39, 1);  // enable sensor wake
+    rtc_gpio_set_level(pir_power, 1);
+    rtc_gpio_hold_en(pir_power);
+    esp_sleep_enable_ext0_wakeup(pir_signal, 1);  // enable sensor wake
 }

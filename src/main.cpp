@@ -2,7 +2,6 @@
 #include <WiFi.h>
 #include <memorysaver.h>
 #include <sys/time.h>
-
 #include <vector>
 
 #include "email/email.h"
@@ -13,21 +12,26 @@
 #include "reset/reset.h"
 
 using namespace std;
-
+//persistant values
 RTC_DATA_ATTR timeval sleep_time;
 RTC_DATA_ATTR int boot_count = 0;
-
-// pins
+// pir pins
 const int pir_signal = 39;
 const int pir_power = 25;
+//cam pins
 const int camera_signal = 15;
 const int camera_power = 13;
+//
+const int threshold_duration_s = 30;
+const int max_reset_tries = 3;
+const int wifi_reset_s = 10;
+const int safe_heap = 150000;
 
 void capture_pics(vector<String>& base64_vector) {
     Camera cam(camera_signal, camera_power);
     int img_count = 0;
     for (String& base64_string : base64_vector) {
-        if (ESP.getFreeHeap() > 150000) {
+        if (ESP.getFreeHeap() > safe_heap) {
             cam.capture(base64_string);
         }
         ++img_count;
@@ -51,8 +55,7 @@ void send_email(vector<String>& base64_vector, bool reset) {
 }
 
 bool check_threshold() {
-    int duration_s = 30;
-
+    int duration_s = threshold_duration_s;
     timeval duration;  // compute duration since last boot
     if (esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_EXT0) {
         timeval timeNow;
@@ -64,7 +67,7 @@ bool check_threshold() {
 }
 
 void check_wifi(vector<String>& base64_vector, int reset_count) {
-    int connection_timeout = 10;
+    int connection_timeout = wifi_reset_s;
     int timeout_counter = 0;
     while (WiFi.status() != WL_CONNECTED) {
         Serial.print(".");
@@ -91,15 +94,14 @@ void sleep() {
 }
 
 void setup() {
-    init_pir();  // init pir sensor power interrupt and wake pin
+    init_pir(pir_signal, pir_power); 
+    Serial.begin(9600); 
     vector<String> img_container = {"", "", "", ""};
-    Serial.begin(9600);
+    
+    int reset_count = get_reset_count();
+    bool reset = reset_count > -1;
 
-    pair<bool, int> reset_result = is_reset();
-    bool reset = reset_result.first;
-    int reset_count = reset_result.second;
-
-    if ((check_threshold() || reset) && reset_count < 4) {  // check if over time threshold or reset
+    if ((check_threshold() || reset) && reset_count < max_reset_tries) {  
         WiFi.begin(ssid, password);
         if (reset) {
             open_reset(img_container);
@@ -111,7 +113,7 @@ void setup() {
         send_email(img_container, reset);
         set_new_time();
     } else {
-        if (reset_count >= 4) {
+        if (reset_count >= max_reset_tries) {
             Serial.println("Reset failed");
         } else {
             Serial.println("Duration below threshold");

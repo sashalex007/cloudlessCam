@@ -33,15 +33,14 @@ void open_reset(std::vector<String>& base64_vector) {
     }
 }
 
-std::pair<bool, int> is_reset() {
-    std::pair<bool, int> result(false, 0);
+int get_reset_count() {
+    int reset_count = -1;
     LittleFS.begin();
-    if (LittleFS.exists("/reset_count.txt")) {  // check if boot is for is_reset
-        result.first = true;
+    if (LittleFS.exists("/reset_count.txt")) {
         File file;
         file = LittleFS.open("/reset_count.txt", "r");
-        result.second = file.readString().toInt();
+        reset_count = file.readString().toInt();
         file.close();
     }
-    return result;
+    return reset_count;
 }
