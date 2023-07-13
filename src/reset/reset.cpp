@@ -1,9 +1,10 @@
-#include <vector>
-#include <WString.h>
 #include <LittleFS.h>
+#include <WString.h>
+#include <vector>
 #include "reset.h"
 
-void save_reset(std::vector<String>& base64_vector, int reset_count) {
+
+void save_reset(std::vector<String> &base64_vector, int reset_count) {
     File file;
     const char *files[4] = {"/0.txt", "/1.txt", "/2.txt", "/3.txt"};
     for (int i = 0; i < 4; i++) {
@@ -19,7 +20,7 @@ void save_reset(std::vector<String>& base64_vector, int reset_count) {
     file.close();
 }
 
-void open_reset(std::vector<String>& base64_vector) {
+void open_reset(std::vector<String> &base64_vector) {
     File file;
     const char *files[4] = {"/0.txt", "/1.txt", "/2.txt", "/3.txt"};
     for (int i = 0; i < 4; i++) {
@@ -29,7 +30,14 @@ void open_reset(std::vector<String>& base64_vector) {
         }
         file.close();
         LittleFS.remove(files[i]);
-        LittleFS.remove("/reset_count.txt");
+    }
+}
+
+void erase_reset() {
+    File file;
+    const char *files[4] = {"/0.txt", "/1.txt", "/2.txt", "/3.txt"};
+    for (int i = 0; i < 4; i++) {
+        LittleFS.remove(files[i]);
     }
 }
 
@@ -41,6 +49,7 @@ int get_reset_count() {
         file = LittleFS.open("/reset_count.txt", "r");
         reset_count = file.readString().toInt();
         file.close();
+        LittleFS.remove("/reset_count.txt");
     }
     return reset_count;
 }

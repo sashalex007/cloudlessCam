@@ -3,7 +3,7 @@
 #include <esp32-hal.h>
 #include "gpio.h"
 
-void init_pir(const int pir_signal, const int pir_power) {
+void init_pir(const gpio_num_t pir_signal, const gpio_num_t pir_power) {
     rtc_gpio_hold_dis(pir_power); //interrupt pir power
     rtc_gpio_init(pir_power);
     rtc_gpio_set_direction(pir_power, RTC_GPIO_MODE_OUTPUT_ONLY);

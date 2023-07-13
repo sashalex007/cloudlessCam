@@ -16,8 +16,8 @@ using namespace std;
 RTC_DATA_ATTR timeval sleep_time;
 RTC_DATA_ATTR int boot_count = 0;
 // pir pins
-const int pir_signal = 39;
-const int pir_power = 25;
+const gpio_num_t pir_signal = GPIO_NUM_39;
+const gpio_num_t pir_power = GPIO_NUM_25;
 //cam pins
 const int camera_signal = 15;
 const int camera_power = 13;
@@ -25,7 +25,7 @@ const int camera_power = 13;
 const int threshold_duration_s = 30;
 const int max_reset_tries = 3;
 const int wifi_reset_s = 10;
-const int safe_heap = 150000;
+const int safe_heap = 160000;
 
 void capture_pics(vector<String>& base64_vector) {
     Camera cam(camera_signal, camera_power);
@@ -55,6 +55,11 @@ void send_email(vector<String>& base64_vector, bool reset) {
 }
 
 bool check_threshold() {
+    if (boot_count == 0) {
+        ++boot_count;
+        return false;
+    }
+
     int duration_s = threshold_duration_s;
     timeval duration;  // compute duration since last boot
     if (esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_EXT0) {
@@ -115,6 +120,7 @@ void setup() {
     } else {
         if (reset_count >= max_reset_tries) {
             Serial.println("Reset failed");
+            erase_reset();
         } else {
             Serial.println("Duration below threshold");
         }
