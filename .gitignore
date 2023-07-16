@@ -5,4 +5,5 @@
 .vscode/launch.json
 .vscode/ipch
 private_variables.cpp
+.DS_Store
 .test

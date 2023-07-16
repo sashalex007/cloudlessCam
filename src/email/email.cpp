@@ -37,6 +37,8 @@ void Email::add_attachment(String& base64_string, int img_count) {
 }
 
 void Email::send(const int reset, int boot_count, int tries) {
+    //ESP32_WCS test;
+    //test.setInsecure()
     if (tries < 3) {
         static char outstr[15];
         dtostrf(read_battery(), 3, 2, outstr);

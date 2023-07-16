@@ -20,23 +20,23 @@ void Camera::capture(String& base64_string) {
     // Start capture
     cam.start_capture();
 
-    Serial.println(F("Start Capture"));
+    //Serial.println(F("Start Capture"));
     while (!cam.get_bit(ARDUCHIP_TRIG, CAP_DONE_MASK)) {
         //
     }
-    Serial.println(F("Capture Done."));
+    //Serial.println(F("Capture Done."));
     length = cam.read_fifo_length();
-    Serial.print(F("The fifo length is :"));
-    Serial.println(length, DEC);
+    //Serial.print(F("The fifo length is :"));
+    //Serial.println(length, DEC);
 
     if (length >= MAX_FIFO_SIZE)  // 8M
     {
-        Serial.println(F("Over size."));
+        //Serial.println(F("Over size."));
         skip = true;
     }
     if (length == 0)  // 0 kb
     {
-        Serial.println(F("Size is 0."));
+        //Serial.println(F("Size is 0."));
         skip = true;
     }
 
@@ -77,6 +77,13 @@ void Camera::capture(String& base64_string) {
         }
     } else {
         cam.CS_HIGH();
+    }
+
+    if (base64_string != "") {
+        Serial.println("Capture completed");
+
+    } else {
+        Serial.println("Capture failed");
     }
 }
 
@@ -156,6 +163,8 @@ void init(ArduCAM& cam, int camera_signal, int camera_power) {
     cam.InitCAM();
     set_exposure(cam);
     cam.OV2640_set_JPEG_size(OV2640_800x600);
+    //cam.OV2640_set_JPEG_size(OV2640_1280x1024);
+    //cam.OV2640_set_JPEG_size(OV2640_1600x1200);
     cam.clear_fifo_flag();
     delay(500);  // delay for camera sensor initialization
     Serial.println("Camera init complete.");

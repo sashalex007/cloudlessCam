@@ -25,15 +25,26 @@ const int camera_power = 13;
 const int threshold_duration_s = 30;
 const int max_reset_tries = 3;
 const int wifi_reset_s = 10;
-const int safe_heap = 160000;
+const int safe_heap = 75000;
+
+void ram_status() {
+    Serial.printf( "heap: %d free\n", esp_get_free_heap_size());
+}
+
+void check_memory(vector<String>& base64_vector) {
+    ram_status();
+    while (esp_get_free_heap_size() < safe_heap) {
+        base64_vector.pop_back();
+        Serial.println("Image removed");
+    }
+    ram_status();
+}
 
 void capture_pics(vector<String>& base64_vector) {
     Camera cam(camera_signal, camera_power);
     int img_count = 0;
     for (String& base64_string : base64_vector) {
-        if (ESP.getFreeHeap() > safe_heap) {
-            cam.capture(base64_string);
-        }
+        cam.capture(base64_string);
         ++img_count;
         if (img_count < base64_vector.size()) {
             delay(100);
@@ -55,11 +66,6 @@ void send_email(vector<String>& base64_vector, bool reset) {
 }
 
 bool check_threshold() {
-    if (boot_count == 0) {
-        ++boot_count;
-        return false;
-    }
-
     int duration_s = threshold_duration_s;
     timeval duration;  // compute duration since last boot
     if (esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_EXT0) {
@@ -97,12 +103,12 @@ void sleep() {
     delay(100);
     esp_deep_sleep_start();
 }
-
+ 
 void setup() {
     init_pir(pir_signal, pir_power); 
-    Serial.begin(9600); 
+    Serial.begin(9600);
     vector<String> img_container = {"", "", "", ""};
-    
+
     int reset_count = get_reset_count();
     bool reset = reset_count > -1;
 
@@ -112,9 +118,11 @@ void setup() {
             open_reset(img_container);
         } else {
             ++boot_count;
+            ram_status();
             capture_pics(img_container);
         }
         check_wifi(img_container, reset_count);
+        check_memory(img_container);
         send_email(img_container, reset);
         set_new_time();
     } else {
