@@ -1,9 +1,9 @@
-#include "camera.h"
 #include <ArduCAM.h>
 #include <base64.h>
 #include <SPI.h>
 #include <Wire.h>
 #include <esp32-hal.h>
+#include "camera.h"
 
 void Camera::capture(String& base64_string) {
     byte buff[255];

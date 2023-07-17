@@ -1,8 +1,6 @@
 #include <LittleFS.h>
-#include <WString.h>
 #include <vector>
 #include "reset.h"
-
 
 void save_reset(std::vector<String> &base64_vector, int reset_count) {
     File file;

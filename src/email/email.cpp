@@ -1,7 +1,6 @@
-
 #include <ESP_Mail_Client.h>
 #include "../read_battery/read_battery.h"
-#include "private_variables.h"
+#include "./private_variables/private_variables.h"
 #include "email.h"
 
 Email::Email() {
