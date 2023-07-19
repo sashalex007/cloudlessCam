@@ -30,7 +30,8 @@ void setup() {
     int reset_count = get_reset_count();
     bool reset = reset_count > -1;
 
-    if ((check_threshold(threshold_duration_s, sleep_time) || reset) && reset_count < max_reset_tries) {  
+    if ((check_threshold(threshold_duration_s, sleep_time) || reset) 
+        && reset_count < max_reset_tries) {  
         start_wifi();
         if (reset) {
             open_reset(img_container);

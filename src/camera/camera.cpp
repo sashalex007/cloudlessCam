@@ -7,8 +7,8 @@
 
 void Camera::capture(String& base64_string) {
     byte buff[255];
+    int i = 0;
     bool skip = false;
-    static int i = 0;
     uint8_t temp = 0, temp_last = 0;
     uint32_t length = 0;
     bool is_header = false;
@@ -49,19 +49,24 @@ void Camera::capture(String& base64_string) {
             // Read JPEG data from FIFO
             if ((temp == 0xD9) && (temp_last == 0xFF))  // If find the end ,break while,
             {
-                buff[i++] = temp;
+                if (i < 255) {
+                    buff[i++] = temp;
+                } else {
+                    i = 255;
+                }
                 // Write the remain bytes in the buffer
                 cam.CS_HIGH();
                 base64_string += base64::encode(buff, i);
                 is_header = false;
                 i = 0;
+                break;
             }
             if (is_header == true) {
                 // Write image data to buffer if not full
                 if (i < 255) {
                     buff[i++] = temp;
                 } else {
-                    // Write 256 bytes image data to file
+                    // Write 255 bytes image data to file
                     cam.CS_HIGH();
                     base64_string += base64::encode(buff, 255);
                     i = 0;
@@ -71,6 +76,9 @@ void Camera::capture(String& base64_string) {
                 }
             } else if ((temp == 0xD8) & (temp_last == 0xFF)) {
                 is_header = true;
+                if (i >= 255) {
+                    i = 0;
+                }
                 buff[i++] = temp_last;
                 buff[i++] = temp;
             }

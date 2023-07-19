@@ -19,8 +19,8 @@ void check_memory(vector<String>& base64_vector, const int safe_heap) {
     while (esp_get_free_heap_size() < safe_heap) {
         base64_vector.pop_back();
         Serial.println("Image removed");
+        ram_status();
     }
-    ram_status();
 }
 
 void capture_pics(vector<String>& base64_vector, const int camera_signal, const int camera_power) {
