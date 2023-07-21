@@ -18,7 +18,7 @@ void save_reset(std::vector<String> &base64_vector, int reset_count) {
     file.close();
 }
 
-void open_reset(std::vector<String> &base64_vector) {
+void load_pics_from_file(std::vector<String> &base64_vector) {
     File file;
     const char *files[4] = {"/0.txt", "/1.txt", "/2.txt", "/3.txt"};
     for (int i = 0; i < 4; i++) {
@@ -31,7 +31,7 @@ void open_reset(std::vector<String> &base64_vector) {
     }
 }
 
-void erase_reset() {
+void erase_pics_file() {
     File file;
     const char *files[4] = {"/0.txt", "/1.txt", "/2.txt", "/3.txt"};
     for (int i = 0; i < 4; i++) {

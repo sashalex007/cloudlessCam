@@ -2,8 +2,8 @@
 #define RESET_H
 
 void save_reset(std::vector<String>& base64_vector, int reset_count);
-void open_reset(std::vector<String>& base64_vector);
+void load_pics_from_file(std::vector<String>& base64_vector);
 int get_reset_count();
-void erase_reset();
+void erase_pics_file();
 
 #endif

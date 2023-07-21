@@ -10,16 +10,16 @@ void start_wifi() {
     WiFi.begin(ssid, password);
 }
 
-void ram_status() {
+void print_free_heap() {
     Serial.printf( "heap: %d free\n", esp_get_free_heap_size());
 }
 
-void check_memory(vector<String>& base64_vector, const int safe_heap) {
-    ram_status();
+void free_memory_if_over(vector<String>& base64_vector, const int safe_heap) {
+    print_free_heap();
     while (esp_get_free_heap_size() < safe_heap) {
         base64_vector.pop_back();
         Serial.println("Image removed");
-        ram_status();
+        print_free_heap();
     }
 }
 
@@ -60,7 +60,7 @@ bool check_threshold(const int threshold_duration_s, timeval& sleep_time) {
     return (duration.tv_sec * (uint64_t)1) > (time_t)duration_s || duration.tv_sec * (uint64_t)1 < (time_t)0;
 }
 
-void check_wifi(vector<String>& base64_vector, const int reset_count, const int wifi_reset_s) {
+void check_wifi_or_reset(vector<String>& base64_vector, const int reset_count, const int wifi_reset_s) {
     int connection_timeout = wifi_reset_s;
     int timeout_counter = 0;
     while (WiFi.status() != WL_CONNECTED) {

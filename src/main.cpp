@@ -23,35 +23,34 @@ const int wifi_reset_s = 10;
 const int safe_heap = 75000;
 
 void setup() {
-    init_pir(pir_signal, pir_power); 
+    init_pir_sensor(pir_signal, pir_power); 
     Serial.begin(9600);
     std::vector<String> img_container = {"", "", "", ""};
 
     int reset_count = get_reset_count();
-    bool reset = reset_count > -1;
+    bool reset = (reset_count > -1) && (reset_count < max_reset_tries);
 
-    if ((check_threshold(threshold_duration_s, sleep_time) || reset) 
-        && reset_count < max_reset_tries) {  
+    if (check_threshold(threshold_duration_s, sleep_time) || reset) {  
         start_wifi();
         if (reset) {
-            open_reset(img_container);
+            load_pics_from_file(img_container);
         } else {
             ++boot_count;
-            ram_status();
+            print_free_heap();
             capture_pics(img_container, camera_signal, camera_power);
         }
-        check_wifi(img_container, reset_count, wifi_reset_s);
-        check_memory(img_container, safe_heap);
+        check_wifi_or_reset(img_container, reset_count, wifi_reset_s);
+        free_memory_if_over(img_container, safe_heap);
         send_email(img_container, reset, boot_count);
         set_new_time(sleep_time);
     } else {
         if (reset_count >= max_reset_tries) {
             Serial.println("Reset failed");
-            erase_reset();
+            erase_pics_file();
         } else {
             Serial.println("Duration below threshold");
         }
-        delay(2000);
+        delay(2000); //allow PIR sensor to stabilize
     }
     sleep();
 }
