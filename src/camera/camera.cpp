@@ -6,6 +6,10 @@
 #include "camera.h"
 
 void Camera::capture(String& base64_string) {
+    if (!base64_string.reserve(20000)){
+        Serial.println("Memory allocation failed");
+    } 
+
     byte buff[255];
     int i = 0;
     bool skip = false;

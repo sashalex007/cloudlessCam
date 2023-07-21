@@ -16,13 +16,12 @@ Email::Email() {
     // message.addRecipient(recipient_name2, recipient_email2);
     message.html.transfer_encoding = Content_Transfer_Encoding::enc_7bit;
     message.html.charSet = "utf-8";
-    message.html.content += "<br><br>";
 }
 
 void Email::add_attachment(String& base64_string, int img_count) {
     SMTP_Attachment att;
     message.html.content += "<div style='height:800; width:600'>";
-    message.html.content += "<img style='transform:rotate(-90deg); filter: brightness(150%);' src=\"cid:image-" + toStringPtr(img_count) + "\" alt=\"cam image\"><br/><br/>";
+    message.html.content += "<img style='transform:rotate(-90deg); filter: brightness(150%);' src=\"cid:image-" + toStringPtr(img_count) + "\" alt=\"cam image\">";
     message.html.content += "</div><br>";
     att.descr.filename = toStringPtr(img_count) + ".jpeg";
     att.descr.mime = "image/jpeg";
@@ -36,8 +35,6 @@ void Email::add_attachment(String& base64_string, int img_count) {
 }
 
 void Email::send(const int reset, int boot_count, int tries) {
-    //ESP32_WCS test;
-    //test.setInsecure()
     if (tries < 3) {
         static char outstr[15];
         dtostrf(read_battery(), 3, 2, outstr);

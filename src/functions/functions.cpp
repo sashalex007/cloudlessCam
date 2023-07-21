@@ -69,7 +69,7 @@ void check_wifi_or_reset(vector<String>& base64_vector, const int reset_count, c
         timeout_counter++;
         if (timeout_counter >= connection_timeout * 5) {
             Serial.println("Wifi failure, saving data...");
-            save_reset(base64_vector, reset_count);
+            save_pics_to_file(base64_vector, reset_count);
             Serial.println("Reset initiated");
             ESP.restart();
         }

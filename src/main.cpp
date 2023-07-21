@@ -28,9 +28,10 @@ void setup() {
     std::vector<String> img_container = {"", "", "", ""};
 
     int reset_count = get_reset_count();
-    bool reset = (reset_count > -1) && (reset_count < max_reset_tries);
+    bool reset = reset_count > -1;
+    bool reset_failed = reset_count >= max_reset_tries;
 
-    if (check_threshold(threshold_duration_s, sleep_time) || reset) {  
+    if ((check_threshold(threshold_duration_s, sleep_time) || reset) && !reset_failed) {  
         start_wifi();
         if (reset) {
             load_pics_from_file(img_container);
@@ -44,7 +45,7 @@ void setup() {
         send_email(img_container, reset, boot_count);
         set_new_time(sleep_time);
     } else {
-        if (reset_count >= max_reset_tries) {
+        if (reset_failed) {
             Serial.println("Reset failed");
             erase_pics_file();
         } else {

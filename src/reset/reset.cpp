@@ -2,7 +2,7 @@
 #include <vector>
 #include "reset.h"
 
-void save_reset(std::vector<String> &base64_vector, int reset_count) {
+void save_pics_to_file(std::vector<String> &base64_vector, int reset_count) {
     File file;
     const char *files[4] = {"/0.txt", "/1.txt", "/2.txt", "/3.txt"};
     for (int i = 0; i < 4; i++) {
