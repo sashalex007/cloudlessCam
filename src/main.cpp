@@ -51,7 +51,7 @@ void setup() {
         } else {
             Serial.println("Duration below threshold");
         }
-        delay(2000); //allow PIR sensor to stabilize
+        delay(2000); //allow PIR sensor to stabilize before sleeping
     }
     sleep();
 }
