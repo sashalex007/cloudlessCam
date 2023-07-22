@@ -15,7 +15,7 @@ const gpio_num_t pir_signal = GPIO_NUM_39;
 const gpio_num_t pir_power = GPIO_NUM_25;
 //cam pins
 const int camera_signal = 15;
-const int camera_power = 13;
+const int camera_power = 13; //transistor
 //static values
 const int threshold_duration_s = 30;
 const int max_reset_tries = 3;
